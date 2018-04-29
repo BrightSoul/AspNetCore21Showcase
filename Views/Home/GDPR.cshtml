@@ -1,0 +1,36 @@
+﻿<h1>Normativa GDPR</h1>
+<p>Secondo la normativa, gli utenti devono essere in grado di visulizzare in qualsiasi momento i dati in possesso dell'applicazione ed eventulmente chiederne la cancellazione.</p>
+<p>Inoltre, se il sito usa cookie non essenziali ai fini di tracciamento e profilazione, deve apparire una barra per richiedere l'esplicito consenso all'utente.</p>
+<p>Si intende che la comunicazione deve essere protetta da certificato SSL, così da evitare che l'utente invii password su canale non sicuro HTTP.</p>
+<h2>Esempio 1</h2>
+<p>Dopo aver effettuato la registrazione, visitare la pagina del profilo personale, alla scheda "Personal data". La UI di ASP.NET Identity permetterà sia di scaricare i dati dell'account che eliminare l'account stesso.</p>
+<a asp-area="Identity" asp-controller="Account" asp-action="Manage" asp-route-id="PersonalData" class="btn btn-primary">Apri la pagina "Personal data" del profilo</a>
+
+<h2>Esempio 2</h2>
+<p>Alla prima apertura dell'applicazione, all'utente viene chiesto se vuole approvare l'uso dei cookie. Il testo del messaggio può essere personalizzato dalla view <code>/Views/Shared/_CookieConsentPartial.cshtml</code>.</p>
+<p>Il messaggio deve linkare alla pagina della policy in cui sono indicate per esteso le modalità di utilizzo dei dati personali.</p>
+<a asp-area="" asp-controller="Home" asp-action="Privacy" class="btn btn-primary">Apri la pagina della policy</a>
+
+<h2>Come realizzarlo</h2>
+<p>Per avere le funzioni di download ed eliminazione dei dati è sufficiente abilitare ASP.NET Identity con le sue impostaioni predefinite dal metodo <code>ConfigureServices</code> della classe <code>Startup</code>.</p>
+<pre>
+services.AddDefaultIdentity&lt;IdentityUser&gt;()
+  .AddEntityFrameworkStores&lt;ApplicationDbContext&gt;();
+</pre>
+<p>Per far apparire la barra di consenso ai cookie, aggiungere il middleware dal metodo <code>Configure</code> della classe <code>Startup</code></p>
+<pre>app.UseCookiePolicy();</pre>
+<p>E poi configurare le opzioni dal metodo <code>ConfigureServices</code></p>
+<pre>
+services.Configure&lt;CookiePolicyOptions&gt;(options =>
+{
+  // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+  options.CheckConsentNeeded = context => true;
+  options.MinimumSameSitePolicy = SameSiteMode.None;
+});
+</pre>
+<p>Mentre invece per abilitare la ridirezione HTTPS usiamo questi due middleware, in modo da reindirizzare l'utente su una connessione sicura se dovesse digitare un indirizzo HTTP</p>
+<pre>
+app.UseHsts();
+app.UseHttpsRedirection();
+</pre>
+<p>Anche se Kestrel supporta HTTPS, è più probabile che in ambiente di produzione il certificato SSL venga installato sul reverse proxy (IIS, nginx o apache)</p>

@@ -1,0 +1,62 @@
+﻿<h1>Attributo [ApiController]</h1>
+<p>Possiamo decorare i controller della nostra web api con l'attributo <code>[ApiController]</code>. Non è strettamente necessario farlo, ma avremo alcuni benefici:</p>
+<ul>
+    <li>Non è più necessario ricordarsi di verificare che <code>ModelState.IsValid</code> sia <code>true</code> perché questo controllo verrà fatto automaticamente per noi. Se il client ha fornito dati non conformi alle data annotation poste sul modello (es. non ha fornito un valore obbligatorio) allora l'action restituirà automaticamente lo status code <code>400 Bad Request</code>;</li>
+    <li>Il metodo Ok, che usiamo per fornire un oggetto in risposta al client, ora restituisce il tipo <code>ActionResult&lt;TResult&gt;</TResult></code>. In questo modo, la documentazione Swagger sarà in grado di capire qual è il tipo reale restituito dall'action.</li>
+</ul>
+
+<h2>Esempio 1</h2>
+<p>Clicca il bottone per invocare il <code>ValuesController</code> presente in questa applicazione. Se hai digitato qualcosa nella casella, otterrai una risposta <code>200 OK</code> ma se non hai digitato nulla, vedrai un errore <code>400 Bad Request</code> perché il valore è obbligatorio, come risulta dalla classe <code>ValuesRequest</code>.
+Per il solo fatto di aver decorato il <code>ValuesController</code> con l'attributo <code>[ApiController]</code> abbiamo gratis la verifica sulla validità del model.</p>
+<form>
+    <input id="text" type="text" class="form-control" placeholder="Lascia vuoto per avere un errore 400" style="margin-bottom:10px;" />
+    <button type="button" class="btn btn-primary" onclick="sendRequest()">Invoca la web api</button>
+    <span id="result" style="margin-left:10px;"></span>
+</form>
+@section Scripts {
+<script>
+function sendRequest() {
+    var result = document.getElementById('result');
+    result.innerText = "";
+    var text = document.getElementById('text');
+    var payload = {
+        Text: text.value
+    };
+    var configuration = {
+        method: "post",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type" : "application/json" }
+    };
+    //Per inviare la richiesta uso la nuova fetch api
+    //https://developer.mozilla.org/it/docs/Web/API/Fetch_API
+    fetch('@Url.Action("Get", "Values")', configuration).then(function(response) {
+        if (response.ok) {
+            response.text().then(function(data) {
+                result.innerText = response.status + " " + response.statusText + ", il server ha restituito: " + data;
+                result.style.color = "green";
+            });
+        } else {
+            result.innerText = "Errore dal server: " + response.status + " " + response.statusText;
+            result.style.color = "red";
+        }
+    });
+}
+</script>
+}
+
+<h2>Esempio 2</h2>
+<p>Nella documentazione Swagger viene riportato correttamente il tipo di dato <code>ValuesResponse</code> restituito dal <code>ValuesController</code>, anche senza aver usato alcun attributo specifico di Swagger. Il risultato dell'action viene inferito facilmente perché il suo tipo di ritorno è ora <code>ActionResult&lt;ValuesResponse&gt;</code>.</p>
+<a href="~/swagger" target="_blank" class="btn btn-primary">Apri la documentazione Swagger</a>
+
+<h2>Come realizzarlo</h2>
+<p>Ecco una dimostrazione di come usare l'attributo [ApiController]. Lo si può vedere in azione nel file <code>Controllers/Api/ValuesController.cs</code></p>
+<pre>
+[ApiController, Route("api/[controller]")]
+public class ValuesController : Controller {
+  [HttpPost, Route("")]
+  public ActionResult&lt;ValuesResponse&gt; Get([FromBody] ValuesRequest request) { 
+    //Omissis
+    return Ok(oggetto);
+  }
+}
+</pre>

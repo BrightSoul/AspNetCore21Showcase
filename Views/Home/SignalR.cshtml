@@ -1,0 +1,110 @@
+﻿<h1>ASP.NET Core SignalR</h1>
+<p>ASP.NET Core Signalr usa Web sockets per comunicare in tempo reale con altri client connessi. Guarda l'implementazione lato server nella classe <code>/Hubs/DrawHub.cs</code> e il client nella view <code>/Views/SignalR.cshtml</code>. jQuery non è richiesto.</p>
+<h2>Esempio</h2>
+<p>Apri questa pagina in due o più browser, poi inizia a disegnare nella canvas qui sotto!</p>
+<canvas id="canvas" width="600" height="300" onmousedown="startDrawing(event)" onmousemove="performDrawing(event)" onmouseup="stopDrawing()" onmouseout="stopDrawing()" style="border:1px solid black; cursor: crosshair">
+
+</canvas>
+<br />
+<button type="button" class="btn btn-default" onclick="performClear()">Pulisci</button>
+@section Scripts {
+@* In un'applicazione reale, il client di SignalR bisogna ottenerlo come pacchetto npm: https://www.npmjs.com/package/@aspnet/signalr *@
+<script src="~/js/signalr.min.js" asp-append-version="true"></script>
+<script>
+    var drawing = false;
+    var lastPosition = null;
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    var connection = new signalR.HubConnection('/draw');
+
+    function startDrawing(event) {
+        drawing = true;
+        fromPosition = { x: event.offsetX, y: event.offsetY };
+    }
+    function stopDrawing() {
+        drawing = false;
+    }
+    function performDrawing(event) {
+        if (!drawing) return;
+
+        var shouldDraw = Math.abs(fromPosition.x - event.offsetX) + Math.abs(fromPosition.y - event.offsetY) >= 10;
+        if (shouldDraw) {
+            var toPosition = { x: event.offsetX, y: event.offsetY };
+            draw(fromPosition, toPosition);
+            connection.send("draw", fromPosition, toPosition);
+            fromPosition = toPosition;
+        }
+    }
+    function draw(fromPosition, toPosition) {
+        ctx.beginPath();
+        ctx.moveTo(fromPosition.x, fromPosition.y);
+        ctx.lineTo(toPosition.x, toPosition.y);
+        ctx.stroke();
+    }
+
+    function performClear() {
+        clear();
+        connection.send("clear");
+    }
+    function clear() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    connection.on('draw', function(fromPosition, toPosition) {
+        draw(fromPosition, toPosition);
+        console.log("drawn");
+    });
+
+    connection.on('clear', function() {
+        clear();
+        console.log("cleared");
+    });
+ 
+    connection.start().then(performClear);
+</script>
+}
+
+<h2>Come realizzarlo</h2>
+<ul>
+    <li>Si crea una classe che deriva da <code>Hub</code>, come la seguente:   
+    <pre>
+public class DrawHub : Hub {
+  //Metodo invocabili dal client con dei parametri
+  public async Task Draw(DrawPoint from, DrawPoint to) {
+    //Inviamo un messaggio agli altri client connessi
+    await Clients.Others.SendAsync("draw", from, to);
+  }
+  //Metodo invocabile dal client, senza parametri
+  public async Task Clear() {
+    //Inviamo un messaggio agli altri client connessi
+    await Clients.Others.SendAsync("clear");
+  }
+}</pre></li>
+    <li>La si registra nel metodo <code>Configure</code> della classe <code>Startup</code>: 
+    <pre>
+app.UseSignalR(routes =>
+{
+  routes.MapHub&lt;DrawHub&gt;("/draw");
+});
+  </pre>
+    </li>
+    <li>E poi ci si connette all'hub lato client, aggiungendo un riferimento alla libreria javascript di SignalR, ottenibile come pacchetto NPM con il nome <code>@@aspnet/signalr</code>:
+    <pre>
+&lt;script src="~/js/signalr.min.js" asp-append-version="true"&gt;&lt;/script&gt;
+&lt;script&gt;
+var connection = new signalR.HubConnection('/draw');
+
+//Lego una callback che verrà eseguita all'arrivo del messaggio "draw"
+connection.on('draw', function(fromPosition, toPosition) {
+  //Fai qualcosa con i dati ricevuti dal server
+});
+
+//Avvio la connessione all'hub.
+//A connessione avvenuta, invio un messaggio al server
+//che poi provvederà a recapitarlo agli altri client connessi
+connection.start().then(function() {
+  connection.send('clear');
+});
+&lt;/script&gt;</pre>
+    </li>
+</ul>

@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<h1>ASP.NET Core 2.1 Showcase</h1>
+<p>Questa applicazione di esempio mostra alcune delle novità di ASP.NET Core 2.1. Clicca le voci del menu per scoprirle una ad una!</p>
+
+<p>Ecco un breve riepilogo:</p>
+<table class="table table-condensed">
+<tr>
+    <th>Aree</th>
+    <td>Introdotte le Aree, in cui inserire porzioni di applicazione web che sono logicamente separate dalla parte principale, come ad esempio un pannello di amministrazione o il blog aziendale. Ogni area ha dei propri model, view e controller.</td>
+</tr>
+<tr>
+    <th>Windows compatibility package</th>
+    <td>Aggiunto il supporto a 20.000 API del .NET Framework, di cui circa metà cross-platform e metà specifiche per Windows. Lo scopo è facilitare il porting verso .NET Core di applicazioni scritte per il .NET Framework tradizionale.</td>
+</tr>
+<tr>
+    <th>ASP.NET Core SignalR</th>
+    <td>Comunicazione realtime e bidirezionale tra client e server grazie all'uso di websockets (se supportati dal browser). Non richiede jQuery.</td>
+</tr>
+<tr>
+    <th>Attributo [ApiController]</th>
+    <td>Si pone sui controller di ASP.NET Web API. Anche se non strettamente necessario, aiuta il framework ad attuare delle convenzioni, come la verifica automatica che il ModelState sia valido e una migliore documentazione con Swagger.</td>
+</tr>
+<tr>
+    <th>Miglioramenti ad HttpClient</th>
+    <td>HttpClient è la classe usata per inviare richieste HTTP a web api di terze parti. Ora ogni HttpClient può essere configurato con uno o più delegating handler per aggiungere responsabilità trasversali, come il logging o la retry policy.</td>
+</tr>
+<tr>
+    <th>Normativa GDPR</th>
+    <td>La UI di ASP.NET Core Identity espone due nuovi bottoni per il download e l'eliminazione dei dati dell'utente in maniera self-service. Inoltre, è stata aggiunta una barra per l'accettazione dei cookie essenziali. Tutte le comunicazioni sono su HTTPS per default.</td>
+</tr>
+</table>

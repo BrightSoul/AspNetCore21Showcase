@@ -1,0 +1,23 @@
+﻿@model List<DriveInfo>
+<h1>Windows Compatibility Pack</h1>
+<p>Questa applicazione referenzia il pacchetto <code>Microsoft.Windows.Compatibility</code> che gli permette di accedere a molte API che si trovavano nel .NET Framework tradizionale. Alcune di esse sono cross-platform, mentre altre specifiche per Windows.</p>
+<a href="https://blogs.msdn.microsoft.com/dotnet/2017/11/16/announcing-the-windows-compatibility-pack-for-net-core/" target="_blank" class="btn btn-primary">Vedi l'elenco delle API del Windows Compatibility Package</a>
+<p>&nbsp;</p>
+<p>Il pacchetto <code>Microsoft.Windows.Compatibility</code> è per coloro che hanno un'applicazione esistente sviluppata per il .NET Framework e non hanno potuto farne il porting sul .NET Core fino a oggi per mancanza di alcune API.</p>
+<p>Ovviamente, se abbiamo bisogno di una specifica API, possiamo fare a meno di referenziare <code>Microsoft.Windows.Compatibility</code> e installare semplicemente il pacchetto che intendiamo usare. Nella <a href="https://www.nuget.org/packages/Microsoft.Windows.Compatibility" target="_blank">pagina NuGet</a> sono elencate tutte le dipendenze che possiamo installare singolarmente.</p>
+
+<h2>Esempio 1: API cross-platform</h2>
+<p>L'immagine qui sotto sarà visibile in tutti i sistemi operativi supportati dal .NET Core perché usa <code>System.Drawing</code>, una API cross-platform. Su alcuni sistemi operativi diversi da Windows potrebbe essere necessario installare librerie native aggiuntive, come ad esempio <code>libgdiplus</code> su Ubuntu. In caso di errore, ASP.NET Core indicherà le librerie mancanti.</p>
+<img src="@Url.Action("WinCompatImage", "Home")" border="1" width="150" height="100" />
+
+<h2>Esempio 2: API specifiche per Windows</h2>
+<p>Queste informazioni saranno disponibili solo su Windows dato che per ottenerle viene usata la <code>Windows Management Instrumentation (WMI)</code>.</p>
+@if (Model != null) {
+<pre>
+@foreach (var drive in @Model) {
+    <text>Il disco @drive.Letter del server ha @drive.RemainingSpaceInMB MB di spazio residuo</text>
+}
+</pre>
+} else {
+    <div class="alert alert-danger">Spiacente, il tuo sistema operativo non è Windows e quindi non supporta questa funzionalità</div>
+}
