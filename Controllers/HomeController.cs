@@ -28,7 +28,7 @@ namespace AspNetCore21Showcase.Controllers
             return View();
         }
 
-        public IActionResult Aree()
+        public IActionResult Razor()
         {
             return View();
         }

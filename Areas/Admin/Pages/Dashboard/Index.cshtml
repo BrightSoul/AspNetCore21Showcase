@@ -1,0 +1,13 @@
+@page
+@model DashboardModel
+<h1>Dashboard</h1>
+<p>Benvenuto! Questa pagina Razor si trova nell'area <code>Admin</code> dell'applicazione web e ha un proprio layout <code>_Layout.cshtml</code>.</p>
+
+<h2>Situazione</h2>
+<p>Ecco qualche dato fornito dal suo <code>DashboardModel</code>:</p>
+<ul>
+    <li>Questo mese abbiamo venduto: @Model.Amount @Model.Currency</li>
+    <li>L'ora del server è @Model.Timestamp</li>
+</ul>
+
+<a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-primary">Torna al sito</a>

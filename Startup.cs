@@ -38,6 +38,17 @@ namespace AspNetCore21Showcase
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            services.AddHsts(options => {
+                options.IncludeSubDomains = true;
+                options.Preload = true;
+                options.MaxAge = TimeSpan.FromDays(365);
+            });
+
+            services.AddHttpsRedirection(options => {
+                //options.HttpsPort = 5001;
+                options.RedirectStatusCode = StatusCodes.Status301MovedPermanently;
+            });
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite(
                     Configuration.GetConnectionString("DefaultConnection")));
@@ -54,9 +65,10 @@ namespace AspNetCore21Showcase
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
             });
 
+            //Configurazione della pipeline di HttpClient
             services.AddHttpClient("ClientForThirdPartyWebApi", client => {
                 //Qui eventuale inizializzazione del client
-                //client.BaseAddress = new Uri("http://servizioremoto.com/api");
+                //client.BaseAddress = new Uri("http://example.com/api");
                 //client.DefaultRequestHeaders.Add("MyHeader", "Value");
             })
             .AddHttpMessageHandler<LogMessageHandler>()
@@ -100,10 +112,6 @@ namespace AspNetCore21Showcase
 
             app.UseMvc(routes =>
             {
-                routes.MapRoute(
-                    name: "area",
-                    template: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
-
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");

@@ -1,0 +1,17 @@
+﻿<h1>Miglioramenti a Razor</h1>
+<p>Ora le view Razor possono essere inserite in aree. Creare un'area ha lo scopo di isolare logicamente alcune parti del sito dalle altre, ad esempio un'area di amministrazione dalla parte pubblica del sito.</p>
+
+<h2>Esempio</h2>
+<p>In quest'applicazione è stata creata l'area <code>Admin</code> all'interno della quale è stata creata una razor page <code>Dashboard.cshtml</code> e un proprio layout.</p>
+<a asp-area="Admin" asp-page="/Dashboard/Index" class="btn btn-primary">Vai all'area admin</a>
+
+<h2>Come realizzarlo</h2>
+<ul>
+    <li>Si crea una directory /Areas/<em>nomearea</em>;</li>
+    <li>Si crea la sottodirectory <code>Pages</code> e, al suo interno, possiamo organizzare le Razor Page come preferiamo. In questo esempio è stata creata la sottodirectory <em>Pages/Dashboard</em> per i contenuti e la sottodirectory <code>Pages/Shared</code> per gli elementi in comune come il layout;</li>
+    <li>Se vogliamo linkare a una pagina razor da una view di ASP.NET Core MVC, possiamo usare il codice seguente, indicando l'area e il percorso della pagina: 
+        <pre>&lt;a asp-area="Admin" asp-page="/Dashboard/Index" class="btn btn-primary"&gt;Vai all'area admin&lt;/a&gt;
+        </pre>
+    </li>
+    </li>
+</ul>
