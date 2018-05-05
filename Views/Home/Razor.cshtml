@@ -1,7 +1,9 @@
 ﻿<h1>Miglioramenti a Razor</h1>
 <p>Ora le view Razor possono essere inserite in aree. Creare un'area ha lo scopo di isolare logicamente alcune parti del sito dalle altre, ad esempio un'area di amministrazione dalla parte pubblica del sito.</p>
+<p>Inoltre, le classi model delle Razor Page possono essere decorate con un nostro attributo che implementa <code>IPageFilter</code>, allo scopo di eseguire logica trasversale prima o dopo l'esecuzione della pagina.</p>
 
-<h2>Esempio</h2>
+
+<h2>Esempio 1</h2>
 <p>In quest'applicazione è stata creata l'area <code>Admin</code> all'interno della quale è stata creata una razor page <code>Dashboard.cshtml</code> e un proprio layout.</p>
 <a asp-area="Admin" asp-page="/Dashboard/Index" class="btn btn-primary">Vai all'area admin</a>
 
@@ -15,3 +17,35 @@
     </li>
     </li>
 </ul>
+
+<h2>Esempio 2</h2>
+<p>Nella directory <code>/Areas/Admin/Pages/Filters</code> è stato creata una classe <code>LogFilter</code> per dimostrare il funzionamento dei filtri nelle Razor Page. Il filtro si occupa semplicemente di loggare l'esecuzione di pagina.</p>
+
+<h2>Come realizzarlo</h2>
+<p>Creare una classe che implementa <code>IPageFilter</code> ed implementarne i metodi. Avremo l'opportunità di eseguire codice alla selezione della pagina da parte del meccanismo di routing, subito prima e subito dopo l'esecuzione.</p>
+<pre>[AttributeUsage(AttributeTargets.Class)]
+public class LogFilter : Attribute, IPageFilter
+{
+  public void OnPageHandlerSelected(PageHandlerSelectedContext context)
+  {
+    //La Razor Page è stata selezionata dal motore di routing
+  }
+  
+  public void OnPageHandlerExecuting(PageHandlerExecutingContext context)
+  {
+    //La Razor Page sta per essere eseguita
+  }
+  
+  public void OnPageHandlerExecuted(PageHandlerExecutedContext context)
+  {
+    //La Razor Page è stata appena eseguita
+  }
+}
+</pre>
+
+<p>A questo punto basta applicare il filtro ponendolo come attributo sulla classe model della Razor Page, ad esempio: 
+<pre>[LogFilter]
+public class DashboardModel : PageModel
+{
+  //...
+}</pre></p>
