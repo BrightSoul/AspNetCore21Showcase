@@ -22,7 +22,7 @@
 <p>Nella directory <code>/Areas/Admin/Pages/Filters</code> è stato creata una classe <code>LogFilter</code> per dimostrare il funzionamento dei filtri nelle Razor Page. Il filtro si occupa semplicemente di loggare l'esecuzione di pagina.</p>
 
 <h2>Come realizzarlo</h2>
-<p>Creare una classe che implementa <code>IPageFilter</code> ed implementarne i metodi. Avremo l'opportunità di eseguire codice alla selezione della pagina da parte del meccanismo di routing, subito prima e subito dopo l'esecuzione.</p>
+<p>Creare un attributo che implementi <code>IPageFilter</code> o <code>IAsyncPageFilter</code>. Avremo l'opportunità di eseguire codice alla selezione della pagina da parte del meccanismo di routing, subito prima e subito dopo l'esecuzione.</p>
 <pre>[AttributeUsage(AttributeTargets.Class)]
 public class LogFilter : Attribute, IPageFilter
 {
