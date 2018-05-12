@@ -15,7 +15,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
 using AspNetCore21Showcase.Hubs;
 using System.Net.Http;
-using AspNetCore21Showcase.Services;
+using AspNetCore21Showcase.MessageHandlers;
+using Polly;
+using System.Net;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace AspNetCore21Showcase
 {
@@ -68,14 +72,20 @@ namespace AspNetCore21Showcase
             //Configurazione della pipeline di HttpClient
             services.AddHttpClient("ClientForThirdPartyWebApi", client => {
                 //Qui eventuale inizializzazione del client
-                //client.BaseAddress = new Uri("http://example.com/api");
+                //client.BaseAddress = new Uri("https://localhost:5001/");
                 //client.DefaultRequestHeaders.Add("MyHeader", "Value");
             })
+            //Message handler personalizzato
             .AddHttpMessageHandler<LogMessageHandler>()
-            .AddHttpMessageHandler<RetryMessageHandler>()
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler());
-
-            services.AddTransient<RetryMessageHandler>();
+            //Message handler di Polly
+            .AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(new TimeSpan[]
+            {
+                TimeSpan.FromMilliseconds(50),
+                TimeSpan.FromMilliseconds(500),
+                TimeSpan.FromMilliseconds(1000),
+            }));
+            
+            //services.AddTransient<RetryMessageHandler>();
             services.AddTransient<LogMessageHandler>();
         }
 

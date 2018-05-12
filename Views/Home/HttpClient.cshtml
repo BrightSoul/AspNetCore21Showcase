@@ -1,7 +1,7 @@
 ﻿<h1>Miglioramenti a HttpClient</h1>
-<p>HttpClient è la classe che usiamo quando vogliamo inviare richieste HTTP a webservice di terze parti. A volte, le richieste possono fallire, specie se il webservice non è proprio affidabile. In queste situazioni possiamo attuare una retry-logic per inviare una seconda o una terza richiesta, nella speranza che il webservice di terze parti risponda correttamente.</p>
-<p>Con ASP.NET Core 2.1, possiamo incapsulare la logica di retry in un <code>DelegatingHandler</code>, così come quella di logging o altre logiche personalizzate. Vedere i due <code>DelegatingHandler</code> che si trovano nella directory <code>DelegatingHandlers</code> di questa applicazione.</p>
-<p>Possiamo comporre i <code>DelegatingHandler</code> in una pipeline, come si vede nel file <code>Startup.cs</code>.</p>
+<p><code>HttpClient</code> è la classe che usiamo quando vogliamo inviare richieste HTTP a web api di terze parti. A volte, le richieste possono fallire per disservizi transitori sulla rete o se la web api non è proprio affidabile. In queste situazioni possiamo attuare una strategia di retry per inviare inviare la richiesta altre volte, nella speranza che la web api di terze parti risponda correttamente.</p>
+<p>Con ASP.NET Core 2.1, è molto facile sfruttare la libreria Polly per attuare logiche complesse in fase di invio della richiesta, così come nostre logiche personalizzate di logging o di altro tipo. All'interno della classe <code>Startup</code> è stato usato il metodo <code>AddHttpClient</code> per configurare queste logiche.</p>
+<p>Vedere anche il file MessageHandlers/LogMessageHandler.cs per capire come attuare logiche personalizzate.</p>
 
 <h2>Esempio</h2>
 <p>Cliccando i bottoni, verrà inviata una richiesta ajax a questa applicazione, che a sua volta invocherà una web api di terze parti usando HttpClient.</p>
@@ -10,7 +10,7 @@
 <div style="margin-bottom:10px;"><button type="button" class="btn btn-primary" style="min-width:320px;" onclick="sendWithoutRetryLogic(this)">Invoca il web service remoto senza retry logic</button> <span id="result1" style="margin-left: 10px"></span></div>
 <div><button type="button" class="btn btn-primary" onclick="sendWithRetryLogic(this)" style="min-width:320px;">Invoca il web service remoto con retry logic</button> <span id="result2" style="margin-left:10px;"></span></div>
 <p></p>
-<p>La retry logic ci aiuta solo in caso di errori cosiddetti "transienti". Invece, se il server remoto è down, anche tutti i successivi tentativi falliranno e quindi dobbiamo sempre gestire la situazione d'errore e avvisare l'utente che l'operazione non è andata a buon fine.</p>
+<p>La retry logic ci aiuta solo in caso di errori transitori. Invece, se il server remoto è down, anche tutti i successivi tentativi falliranno e qui possiamo scegliere se avvisare l'utente oppure fornirgli un risultato di fallback, usando Polly.</p>
 
 @section Scripts {
 <script>
@@ -44,19 +44,23 @@ function sendRequest(button, url, resultElementId) {
 <pre>
 services.AddHttpClient("ClientForThirdPartyWebApi", client => {
   //Qui eventuale inizializzazione del client
-  //client.BaseAddress = new Uri("http://servizioremoto.com/api");
+  //client.BaseAddress = new Uri("https://localhost:5001/");
   //client.DefaultRequestHeaders.Add("MyHeader", "Value");
 })
-//Costruiamo la pipeline di delegating handler
+//Message handler personalizzato
 .AddHttpMessageHandler&lt;LogMessageHandler&gt;()
-.AddHttpMessageHandler&lt;RetryMessageHandler&gt;()
-.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler());
+//Message handler di Polly
+.AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(new TimeSpan[]
+{
+    TimeSpan.FromMilliseconds(50),
+    TimeSpan.FromMilliseconds(500),
+    TimeSpan.FromMilliseconds(1000),
+}));
 
-//Vanno registrati come servizi con ciclo di vita transient
-services.AddTransient&lt;RetryMessageHandler&gt;();
+//Registriamo il nostro message handler con ciclo di vita transient
 services.AddTransient&lt;LogMessageHandler&gt;();
 </pre>
-<p>A questo punto otteniamo da un'action l'istanza dell'HttpClient così configurato. Per fare questo, usiamo il servizio <code>IHttpClientFactory</code>.</p>
+<p>A questo punto otteniamo da un'action l'istanza dell'<code>HttpClient</code> così configurato. Per fare questo, usiamo il nuovo servizio <code>IHttpClientFactory</code>.</p>
 <pre>
 public async Task&lt;IActionResult&gt; HttpClientWithRetryLogic([FromServices] IHttpClientFactory clientFactory)
 {

@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace AspNetCore21Showcase.Services
+namespace AspNetCore21Showcase.MessageHandlers
 {
     public class LogMessageHandler : DelegatingHandler
     {
